@@ -3,38 +3,11 @@
  *
  * Colours are CSS variables, defined once per theme below. The theme is chosen by the
  * data-theme attribute on <html> ("light" or "dark"), set by app.js (TODO-231).
+ * Dark is the default (AC-4), also when the attribute is missing.
  * Every colour belongs in these two blocks; the rest of the file only uses var(--...).
  */
 
 :root,
-[data-theme="light"] {
-  color-scheme: light;
-  --bg: #f3f1ec;
-  --surface: #ffffff;
-  --text: #1f2a37;
-  --muted: #6b7280;
-  --field-label: #4b5563;
-  --brand: #4a2c19;
-  --brand-hover: #613a22;
-  --on-brand: #ffffff;
-  --header-border: #d9d3c7;
-  --card-border: #e3ddd1;
-  --divider: #ece7dd;
-  --control-bg: #ffffff;
-  --control-border: #c9c2b4;
-  --control-hover: #f8f6f1;
-  --preset-active-bg: #e8dfd2;
-  --preset-active-border: #a98467;
-  --error: #9f1239;
-  --bar: #2f6f73;
-  --bar-warn: #c2410c;
-  --chart-label: #374151;
-  --chart-value: #6b7280;
-  --renewal-border: #c2410c;
-  --renewal-bg: #fff4ec;
-  --renewal-text: #9a3412;
-}
-
 [data-theme="dark"] {
   color-scheme: dark;
   --bg: #14181f;
@@ -61,6 +34,35 @@
   --renewal-border: #f97316;
   --renewal-bg: #2a1d14;
   --renewal-text: #fdba74;
+}
+
+/* Declared after the dark block so it wins over :root when data-theme="light". */
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f3f1ec;
+  --surface: #ffffff;
+  --text: #1f2a37;
+  --muted: #6b7280;
+  --field-label: #4b5563;
+  --brand: #4a2c19;
+  --brand-hover: #613a22;
+  --on-brand: #ffffff;
+  --header-border: #d9d3c7;
+  --card-border: #e3ddd1;
+  --divider: #ece7dd;
+  --control-bg: #ffffff;
+  --control-border: #c9c2b4;
+  --control-hover: #f8f6f1;
+  --preset-active-bg: #e8dfd2;
+  --preset-active-border: #a98467;
+  --error: #9f1239;
+  --bar: #2f6f73;
+  --bar-warn: #c2410c;
+  --chart-label: #374151;
+  --chart-value: #6b7280;
+  --renewal-border: #c2410c;
+  --renewal-bg: #fff4ec;
+  --renewal-text: #9a3412;
 }
 
 * {

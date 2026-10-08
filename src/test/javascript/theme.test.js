@@ -33,9 +33,20 @@ function variableNames(block) {
   return (block.match(/--[\w-]+(?=\s*:)/g) || []).sort();
 }
 
+/** Make the OS report a colour-scheme preference; jsdom has no matchMedia of its own. */
+function preferColorScheme(scheme) {
+  window.matchMedia = (query) => ({
+    matches: query.includes('prefers-color-scheme: ' + scheme),
+    media: query,
+    addEventListener() {},
+    removeEventListener() {}
+  });
+}
+
 beforeEach(() => {
   window.localStorage.clear();
   document.documentElement.removeAttribute('data-theme');
+  delete window.matchMedia;
 });
 
 describe('theme toggle', () => {
@@ -46,45 +57,46 @@ describe('theme toggle', () => {
     expect(document.getElementById('app-header').contains(toggle())).toBe(true);
   });
 
-  test('AC-4: with nothing stored the page is light and the button offers dark', async () => {
+  test('AC-4: with nothing stored the page is dark, even when the OS prefers light', async () => {
+    preferColorScheme('light');
     await loadApp();
-    expect(theme()).toBe('light');
-    expect(toggle().textContent).toMatch(/dark/i);
+    expect(theme()).toBe('dark');
+    expect(toggle().textContent).toMatch(/light/i);
   });
 
-  test('AC-1: clicking switches to dark and back, and the label names the next theme', async () => {
+  test('AC-1: clicking switches to light and back, and the label names the next theme', async () => {
     await loadApp();
+    click(document, 'theme-toggle');
+    expect(theme()).toBe('light');
+    expect(toggle().textContent).toMatch(/dark/i);
     click(document, 'theme-toggle');
     expect(theme()).toBe('dark');
     expect(toggle().textContent).toMatch(/light/i);
-    click(document, 'theme-toggle');
-    expect(theme()).toBe('light');
-    expect(toggle().textContent).toMatch(/dark/i);
   });
 
   test('AC-3: the choice is saved in localStorage', async () => {
     await loadApp();
     click(document, 'theme-toggle');
-    expect(window.localStorage.getItem(STORAGE_KEY)).toBe('dark');
+    expect(window.localStorage.getItem(STORAGE_KEY)).toBe('light');
   });
 
-  test('AC-3: a stored dark theme is restored on load', async () => {
-    window.localStorage.setItem(STORAGE_KEY, 'dark');
-    await loadApp();
-    expect(theme()).toBe('dark');
-    expect(toggle().textContent).toMatch(/light/i);
-  });
-
-  test('an unknown stored value falls back to light', async () => {
-    window.localStorage.setItem(STORAGE_KEY, 'purple');
+  test('AC-3: a stored light theme is restored on load', async () => {
+    window.localStorage.setItem(STORAGE_KEY, 'light');
     await loadApp();
     expect(theme()).toBe('light');
+    expect(toggle().textContent).toMatch(/dark/i);
+  });
+
+  test('an unknown stored value falls back to dark', async () => {
+    window.localStorage.setItem(STORAGE_KEY, 'purple');
+    await loadApp();
+    expect(theme()).toBe('dark');
   });
 
   test('the toggle works even when the API is unreachable', async () => {
     await loadApp({ failing: ['/api/health'] });
     click(document, 'theme-toggle');
-    expect(theme()).toBe('dark');
+    expect(theme()).toBe('light');
   });
 });
 
