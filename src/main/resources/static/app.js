@@ -13,6 +13,9 @@
   var DEFAULT_PRESET_DAYS = 30;
   var LATE_LIMIT = 20;
   var SVG_NS = 'http://www.w3.org/2000/svg';
+  var THEME_KEY = 'ops-dashboard.theme';
+  var THEMES = ['light', 'dark'];
+  var DEFAULT_THEME = 'dark';
 
   // ---------- API client ----------
 
@@ -102,9 +105,54 @@
     return Math.round((parseIso(iso) - parseIso(today)) / 86400000);
   }
 
+  // ---------- Theme ----------
+
+  /** The saved theme, or the default when nothing valid is stored or storage is blocked. */
+  function readStoredTheme(win) {
+    try {
+      var stored = win.localStorage.getItem(THEME_KEY);
+      return THEMES.indexOf(stored) === -1 ? DEFAULT_THEME : stored;
+    } catch (e) {
+      return DEFAULT_THEME;
+    }
+  }
+
+  function storeTheme(win, theme) {
+    try {
+      win.localStorage.setItem(THEME_KEY, theme);
+    } catch (e) {
+      // Storage blocked (private mode): the theme still applies for this page.
+    }
+  }
+
+  /**
+   * Apply the saved theme to <html data-theme> and wire the header toggle. Colours live
+   * in style.css only; this just flips the attribute. The button names the theme you get.
+   */
+  function initTheme(document) {
+    var win = document.defaultView;
+    var button = document.getElementById('theme-toggle');
+    var theme = readStoredTheme(win);
+
+    function apply(next) {
+      theme = next;
+      document.documentElement.setAttribute('data-theme', theme);
+      var other = theme === 'dark' ? 'light' : 'dark';
+      button.textContent = other === 'dark' ? 'Dark theme' : 'Light theme';
+      button.setAttribute('aria-label', 'Switch to ' + other + ' theme');
+    }
+
+    apply(theme);
+    button.addEventListener('click', function () {
+      apply(theme === 'dark' ? 'light' : 'dark');
+      storeTheme(win, theme);
+    });
+  }
+
   // ---------- App ----------
 
   function initApp(document, fetchImpl) {
+    initTheme(document);
     var api = createApi(fetchImpl);
 
     var els = {
@@ -367,6 +415,7 @@
 
   var exported = {
     initApp: initApp,
+    initTheme: initTheme,
     createApi: createApi,
     formatRate: formatRate,
     formatMoney: formatMoney,
